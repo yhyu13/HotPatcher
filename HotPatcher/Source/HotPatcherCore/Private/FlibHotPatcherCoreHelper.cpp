@@ -624,13 +624,33 @@ bool UFlibHotPatcherCoreHelper::CookPackage(
 			PRAGMA_DISABLE_DEPRECATION_WARNINGS
 			GIsCookerLoadingPackage = true;
 			PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 0
+			FSavePackageArgs SaveArgs = { Platform, CookedFlags, SaveFlags, false,
+	false, false, FDateTime::MinValue(), GError
+#if WITH_PACKAGE_CONTEXT
+				, CurrentPlatformPackageContext
+#endif
+			};
+			FSavePackageResultStruct Result = GEditor->Save(Package, nullptr,  *CookedSavePath, SaveArgs);
+#else
 			FSavePackageResultStruct Result = GEditor->Save(	Package, nullptr, CookedFlags, *CookedSavePath, 
+<<<<<<< HEAD
 	                                                GError, nullptr, false, false, SaveFlags, Platform.Value, 
 	                                                FDateTime::MinValue(), false, /*DiffMap*/ nullptr
 	#if WITH_PACKAGE_CONTEXT
 	                                                ,CurrentPlatformPackageContext
 	#endif
 	                                                );
+=======
+																GError, nullptr, false, false, SaveFlags, Platform, 
+																FDateTime::MinValue(), false, /*DiffMap*/ nullptr
+				#if WITH_PACKAGE_CONTEXT
+																,CurrentPlatformPackageContext
+				#endif
+																);
+#endif
+>>>>>>> cb99a0c (Fix UE5.0.2 Deprecation Warnings)
 			GIsCookerLoadingPackage = false;
 			
 			bSuccessed = Result == ESavePackageResult::Success;
@@ -1620,10 +1640,10 @@ FProjectPackageAssetCollection UFlibHotPatcherCoreHelper::ImportProjectSettingsP
 	IAssetRegistry* AssetRegistry = &AssetRegistryModule.Get();
 	
 	const UProjectPackagingSettings* const PackagingSettings = GetDefault<UProjectPackagingSettings>();
-	
 	{
 		// allow the game to fill out the asset registry, as well as get a list of objects to always cook
 		TArray<FString> FilesInPathStrings;
+		// yhyu13 : Epic has not yet raised warning to deprecate the delegate, so we would upgrade only if the delegate itself is deprecated
 		FGameDelegates::Get().GetCookModificationDelegate().ExecuteIfBound(FilesInPathStrings);
 		for(const auto& BuildFilename:FilesInPathStrings)
 		{
@@ -1639,7 +1659,13 @@ FProjectPackageAssetCollection UFlibHotPatcherCoreHelper::ImportProjectSettingsP
 	{
 		TArray<FName> PackageToCook;
 		TArray<FName> PackageToNeverCook;
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 0
+		ITargetPlatformManagerModule& TPM = GetTargetPlatformManagerRef();
+		const TArray<ITargetPlatform*>& TargetPlatforms = TPM.GetTargetPlatforms();
+		UAssetManager::Get().ModifyCook(TargetPlatforms, PackageToCook,PackageToNeverCook);
+#else
 		UAssetManager::Get().ModifyCook(PackageToCook,PackageToNeverCook);
+#endif
 		for(const auto& Package:PackageToCook)
 		{
 			AddSoftObjectPath(Package.ToString());
@@ -2130,10 +2156,22 @@ void UFlibHotPatcherCoreHelper::CacheForCookedPlatformData(
     	
     				GIsCookerLoadingPackage = true;
     				{
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 0
+    					// yhyu13 : the deprecated OnPreSaveWorld no longer works, we have to upgrade
+    					FObjectSaveContextData context {nullptr,nullptr,nullptr,SaveFlags};
+    					GEditor->OnPreSaveWorld(World, FObjectPreSaveContext(context));
+#else
     					GEditor->OnPreSaveWorld(SaveFlags, World);
+#endif
     				}
     				{
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 0
+    					FObjectSaveContextData context {nullptr,nullptr,TEXT(""),SaveFlags};
+    					World->PreSaveRoot(FObjectPreSaveRootContext(context));
+    					bool bCleanupIsRequired = context.bCleanupRequired;
+#else
     					bool bCleanupIsRequired = World->PreSaveRoot(TEXT(""));
+#endif
     					WorldsToPostSaveRoot.Add(World, bCleanupIsRequired);
     				}
     				GIsCookerLoadingPackage = false;
@@ -2146,7 +2184,13 @@ void UFlibHotPatcherCoreHelper::CacheForCookedPlatformData(
     					SCOPED_NAMED_EVENT_TEXT("Export PreSave",FColor::Red);
     					GIsCookerLoadingPackage = true;
     					{
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 0
+    						FObjectSaveContextData context;
+    						context.TargetPlatform = Platform;
+    						ExportObj->PreSave(FObjectPreSaveContext(context));
+#else
     						ExportObj->PreSave(Platform);
+#endif
     					}
     					GIsCookerLoadingPackage = false;
     				}
@@ -2207,7 +2251,13 @@ void UFlibHotPatcherCoreHelper::CacheForCookedPlatformData(
 #endif
 			UWorld* World = WorldIt.Key();
 			check(World);
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 0
+			FObjectSaveContextData context;
+			context.bCleanupRequired = WorldIt.Value();
+			World->PostSaveRoot(FObjectPostSaveRootContext(context));
+#else
 			World->PostSaveRoot(WorldIt.Value());
+#endif
 		}
 	}
 }

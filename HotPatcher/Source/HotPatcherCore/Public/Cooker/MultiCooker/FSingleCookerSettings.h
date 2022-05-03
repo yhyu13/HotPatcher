@@ -23,9 +23,9 @@ USTRUCT(BlueprintType)
 struct HOTPATCHERCORE_API FCookerShaderOptions
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="")
 	bool bSharedShaderLibrary = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="")
 	bool bNativeShader = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cooker",meta=(EditCondition="bSharedShaderLibrary"))
 	bool bMergeShaderLibrary = false;
@@ -36,25 +36,25 @@ struct HOTPATCHERCORE_API FSingleCookerSettings:public FHotPatcherCookerSettingB
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="")
 	FString MissionName;
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="")
 	int32 MissionID = -1;
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="")
 	FString ShaderLibName;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="")
 	TArray<FAssetDetail> CookAssets;
 
 	// skip loaded assets when cooking(package path)
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="")
 	TSet<FName> SkipLoadedAssets;
 	
 	// Directories or asset package path
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="")
 	TArray<FString> SkipCookContents;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="")
 	TArray<UClass*> ForceSkipClasses;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cooker")
@@ -97,11 +97,11 @@ public:
 	bool bDisplayConfig = false;
 
 	FString GetStorageCookedAbsDir()const;
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="")
 	FString StorageCookedDir;
 
 	FString GetStorageMetadataAbsDir()const;
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="")
 	FString StorageMetadataDir;
 
 	// UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = "SavePackageContext")
@@ -117,9 +117,9 @@ USTRUCT(BlueprintType)
 struct HOTPATCHERCORE_API FAssetsCollection
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="")
 	ETargetPlatform TargetPlatform = ETargetPlatform::None;
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="")
 	TArray<FAssetDetail> Assets;
 };
 
@@ -128,10 +128,10 @@ struct HOTPATCHERCORE_API FCookerFailedCollection
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="")
 	FString MissionName;
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="")
 	int32 MissionID = -1;
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="")
 	TMap<ETargetPlatform,FAssetsCollection> CookFailedAssets;
 };

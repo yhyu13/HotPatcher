@@ -625,7 +625,7 @@ bool UFlibHotPatcherCoreHelper::CookPackage(
 			GIsCookerLoadingPackage = true;
 			PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 0
+#if ENGINE_MAJOR_VERSION > 4 && ENGINE_MINOR_VERSION > 0
 			FSavePackageArgs SaveArgs = { Platform, CookedFlags, SaveFlags, false,
 	false, false, FDateTime::MinValue(), GError
 #if WITH_PACKAGE_CONTEXT
@@ -635,22 +635,13 @@ bool UFlibHotPatcherCoreHelper::CookPackage(
 			FSavePackageResultStruct Result = GEditor->Save(Package, nullptr,  *CookedSavePath, SaveArgs);
 #else
 			FSavePackageResultStruct Result = GEditor->Save(	Package, nullptr, CookedFlags, *CookedSavePath, 
-<<<<<<< HEAD
-	                                                GError, nullptr, false, false, SaveFlags, Platform.Value, 
-	                                                FDateTime::MinValue(), false, /*DiffMap*/ nullptr
-	#if WITH_PACKAGE_CONTEXT
-	                                                ,CurrentPlatformPackageContext
-	#endif
-	                                                );
-=======
-																GError, nullptr, false, false, SaveFlags, Platform, 
+																GError, nullptr, false, false, SaveFlags, Platform.Value, 
 																FDateTime::MinValue(), false, /*DiffMap*/ nullptr
 				#if WITH_PACKAGE_CONTEXT
 																,CurrentPlatformPackageContext
 				#endif
 																);
 #endif
->>>>>>> cb99a0c (Fix UE5.0.2 Deprecation Warnings)
 			GIsCookerLoadingPackage = false;
 			
 			bSuccessed = Result == ESavePackageResult::Success;
@@ -2358,13 +2349,19 @@ void UFlibHotPatcherCoreHelper::SaveGlobalShaderMapFiles(const TArrayView<const 
 		FShaderRecompileData RecompileData;
 		RecompileData.PlatformName = Platforms[Index]->PlatformName();
 		// Compile for all platforms
-		RecompileData.ShaderPlatform = -1;
+		RecompileData.ShaderPlatform = EShaderPlatform::SP_NumPlatforms;
 		RecompileData.ModifiedFiles = &Files;
 		RecompileData.MeshMaterialMaps = NULL;
+		RecompileData.CommandType = ODSCRecompileCommand::Global;
 
 		check( IsInGameThread() );
 
 		FString OutputDir  = FPaths::Combine(BaseOutputDir,Platforms[Index]->PlatformName());
+#if ENGINE_MAJOR_VERSION > 4 && ENGINE_MINOR_VERSION >= 0
+		FShaderRecompileData Args {RecompileData.PlatformName, RecompileData.ShaderPlatform,
+		RecompileData.CommandType, RecompileData.ModifiedFiles, RecompileData.MeshMaterialMaps, RecompileData.GlobalShaderMap};
+		RecompileShadersForRemote(Args, OutputDir);
+#else
 		RecompileShadersForRemote
 			(RecompileData.PlatformName, 
 			RecompileData.ShaderPlatform == -1 ? SP_NumPlatforms : (EShaderPlatform)RecompileData.ShaderPlatform, //-V547
@@ -2378,6 +2375,7 @@ void UFlibHotPatcherCoreHelper::SaveGlobalShaderMapFiles(const TArrayView<const 
 #endif
 			RecompileData.MeshMaterialMaps, 
 			RecompileData.ModifiedFiles);
+#endif
 	}
 }
 

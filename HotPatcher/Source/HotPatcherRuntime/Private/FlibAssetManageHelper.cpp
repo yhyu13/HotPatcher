@@ -664,15 +664,9 @@ const FAssetPackageData* UFlibAssetManageHelper::GetPackageDataByPackageName(con
 	if (!InPackageName.IsEmpty())
 	{
 		FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
-<<<<<<< HEAD
 		// FString TargetLongPackageName = UFlibAssetManageHelper::PackagePathToLongPackageName(InPackageName);
 		const FString& TargetLongPackageName = InPackageName;
 #if ENGINE_MAJOR_VERSION > 4 && ENGINE_MINOR_VERSION > 0
-=======
-		FString TargetLongPackageName = UFlibAssetManageHelper::PackagePathToLongPackageName(InPackagePath);
-
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 0
->>>>>>> cb99a0c (Fix UE5.0.2 Deprecation Warnings)
 		TOptional<FAssetPackageData> PackageDataOpt = AssetRegistryModule.Get().GetAssetPackageDataCopy(*TargetLongPackageName);
 		if(PackageDataOpt.IsSet())
 		{
@@ -685,7 +679,7 @@ const FAssetPackageData* UFlibAssetManageHelper::GetPackageDataByPackageName(con
 			{
 				return AssetPackageData;
 			}
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 0
+#if ENGINE_MAJOR_VERSION > 4 && ENGINE_MINOR_VERSION > 0
 		}
 #endif
 	}

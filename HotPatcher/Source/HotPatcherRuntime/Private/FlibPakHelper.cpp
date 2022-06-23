@@ -456,10 +456,10 @@ bool PreLoadPak(const FString& InPakPath,const FString& AesKey)
 FSHA1 UFlibPakHelper::GetPakEntryHASH(FPakFile* InPakFile,const FPakEntry& PakEntry)
 {
 	FSHA1 Sha1;
-	FArchive* Reader = InPakFile->GetSharedReader(nullptr);
+	FSharedPakReader Reader = InPakFile->GetSharedReader(nullptr);
 	Reader->Seek(PakEntry.Offset);
 	FPakEntry SerializedEntry;
-	SerializedEntry.Serialize(*Reader, InPakFile->GetInfo().Version);
+	SerializedEntry.Serialize(Reader.GetArchive(), InPakFile->GetInfo().Version);
 	FMemory::Memcpy(Sha1.m_digest, &SerializedEntry.Hash, sizeof(SerializedEntry.Hash));
 	return Sha1;
 }
